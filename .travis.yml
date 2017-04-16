@@ -2,45 +2,55 @@ sudo: false
 
 language: python
 
-python:
-  - 2.7
-  - 3.3
-  - 3.4
-  - 3.5
+python: 3.5
 
 env:
-  - DJANGO=1.6
-  - DJANGO=1.7
-  - DJANGO=1.8
-  - DJANGO==1.9rc1
+  matrix:
+    - TOXENV=py27-django15
+    - TOXENV=py27-django16
+    - TOXENV=py27-django17
+    - TOXENV=py27-django18
+    - TOXENV=py27-django19
+    - TOXENV=py27-django110
+    - TOXENV=py27-django111
+
+    - TOXENV=py33-django15
+    - TOXENV=py33-django16
+    - TOXENV=py33-django17
+    - TOXENV=py33-django18
+
+    - TOXENV=py34-django15
+    - TOXENV=py34-django16
+    - TOXENV=py34-django17
+    - TOXENV=py34-django18
+    - TOXENV=py34-django19
+    - TOXENV=py34-django110
+    - TOXENV=py34-django111
+
+    - TOXENV=py35-django18
+    - TOXENV=py35-django19
+    - TOXENV=py35-django110
+    - TOXENV=py35-django111
+
 
 matrix:
-  exclude:
-    - python: 3.3
-      env: DJANGO==1.9rc1
-    - python: 3.5
-      env: DJANGO=1.6
-    - python: 3.5
-      env: DJANGO=1.7
   include:
     - python: 3.4
       env: DJANGO=1.8  COVERAGE=true  COVERALLS_REPO_TOKEN=LdECqqwg7eelQx9w8gvooUZCFIaCqGZCv
+
+    - python: 3.4
+      env: TOXENV=lint
+
   allow_failures:
     - env: COVERAGE=true
 
 install:
   - pip install -U pip setuptools
-  - pip install flake8
-  - if [[ $DJANGO =~ = ]]; then
-    pip install --pre --quiet "Django=$DJANGO";
-    else
-    pip install --quiet "Django>=$DJANGO,<$DJANGO.99";
-    fi
+  - pip install tox
   - make install
 
 script:
-  - make flake8
-  - make test
+  - tox
 
 after_script:
   - if [ "$COVERAGE" == "true" ]; then

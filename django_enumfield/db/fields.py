@@ -31,7 +31,7 @@ class EnumField(base_class):
 
     def _setup_validation(self, sender, **kwargs):
         """
-        User a customer setter for the field to validate new value against the old one.
+        User a custom setter for the field to validate new value against the old one.
         The current value is set as '_enum_[att_name]' on the model instance.
         """
         att_name = self.get_attname()
@@ -57,7 +57,24 @@ class EnumField(base_class):
             return setattr(self, private_att_name, None)
 
         if not sender._meta.abstract:
-            setattr(sender, att_name, property(get_enum, set_enum, delete_enum))
+            setattr(
+                sender,
+                att_name,
+                property(get_enum, set_enum, delete_enum)
+            )
+
+            # Force make django not think this is a deferred.
+            def _fake_deferred(_self):
+                _enum_fields = {
+                    f.name
+                    for f in sender._meta.get_fields()
+                    if isinstance(f, self.__class__)
+                }
+                return (
+                    super(sender, _self).get_deferred_fields() -
+                    _enum_fields)
+
+            sender.get_deferred_fields = _fake_deferred
 
     def validate(self, value, model_instance):
         super(EnumField, self).validate(value, model_instance)

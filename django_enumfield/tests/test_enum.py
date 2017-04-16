@@ -9,7 +9,9 @@ from django.utils import six
 from django_enumfield.db.fields import EnumField
 from django_enumfield.enum import Enum
 from django_enumfield.exceptions import InvalidStatusOperationError
-from django_enumfield.tests.models import Person, PersonStatus, Lamp, LampState, Beer, BeerStyle, BeerState, LabelBeer
+from django_enumfield.tests.models import (
+    Person, PersonStatus, Lamp, LampState, LampColor,
+    Beer, BeerStyle, BeerState, LabelBeer)
 
 
 class EnumFieldTest(TestCase):
@@ -27,8 +29,21 @@ class EnumFieldTest(TestCase):
 
         lamp = Lamp.objects.create()
         self.assertEqual(lamp.state, LampState.OFF)
+        self.assertEqual(lamp.color, LampColor.RED)
         lamp.state = LampState.ON
+        lamp.color = LampColor.BLUE
         lamp.save()
+        self.assertEqual(lamp.state, LampState.ON)
+        self.assertEqual(lamp.state, 1)
+        self.assertEqual(lamp.color, LampColor.BLUE)
+        self.assertEqual(lamp.color, 2)
+
+        if django.VERSION[:2] <= (1, 7):
+            lamp = Lamp.objects.get(pk=lamp.pk)
+        else:
+            # Deliberately test refresh_from_db
+            lamp.refresh_from_db()
+
         self.assertEqual(lamp.state, LampState.ON)
         self.assertEqual(lamp.state, 1)
 
@@ -40,10 +55,12 @@ class EnumFieldTest(TestCase):
         self.assertEqual(person.status, PersonStatus.ALIVE)
         person.status = PersonStatus.DEAD
         person.save()
+
         self.assertTrue(isinstance(person.status, int))
         self.assertEqual(person.status, PersonStatus.DEAD)
 
         person = Person.objects.get(pk=pk)
+
         self.assertEqual(person.status, PersonStatus.DEAD)
         self.assertTrue(isinstance(person.status, int))
 
@@ -72,8 +89,11 @@ class EnumFieldTest(TestCase):
     def test_enum_field_del(self):
         lamp = Lamp.objects.create()
         del lamp.state
+        del lamp.color
         self.assertEqual(lamp.state, None)
-        self.assertRaises(IntegrityError, lamp.save)
+        self.assertEqual(lamp.color, None)
+        with self.assertRaises(IntegrityError):
+            lamp.save()
 
     def test_enum_field_del_save(self):
         beer = Beer.objects.create()

@@ -21,8 +21,8 @@ def main():
     delete_migrations()
 
     if not settings.configured:
-        # Dynamically configure the Django settings with the minimum necessary to
-        # get Django running tests
+        # Dynamically configure the Django settings with the minimum necessary
+        # to get Django running tests
         settings.configure(
             INSTALLED_APPS=[
                 'django.contrib.auth',
@@ -41,7 +41,6 @@ def main():
             },
             MEDIA_ROOT='/tmp/django_enums/',
             MEDIA_PATH='/media/',
-            ROOT_URLCONF='django_enumfield.tests.urls',
             DEBUG=True,
             TEMPLATE_DEBUG=True,
         )

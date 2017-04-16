@@ -10,8 +10,16 @@ class LampState(Enum):
     ON = 1
 
 
+class LampColor(Enum):
+    RED = 0
+    GREEN = 1
+    BLUE = 2
+
+
 class Lamp(models.Model):
+    # A model with two enum fields
     state = EnumField(LampState)
+    color = EnumField(LampColor)
 
 
 class PersonStatus(Enum):
@@ -30,6 +38,7 @@ class PersonStatus(Enum):
 
 
 class Person(models.Model):
+    name = models.CharField(max_length=10, default="Name")
     status = EnumField(PersonStatus, default=PersonStatus.ALIVE)
 
     def save(self, *args, **kwargs):
